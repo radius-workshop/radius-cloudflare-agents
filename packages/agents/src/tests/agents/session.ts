@@ -1,0 +1,275 @@
+import { Agent } from "../../index";
+import {
+  Session,
+  AgentSessionProvider,
+  AgentContextProvider,
+  AgentSearchProvider,
+  type SessionMessage,
+  type StoredCompaction,
+  type ContextBlock
+} from "../../experimental/memory/session";
+
+/**
+ * Test Agent — full Session API
+ */
+export class TestSessionAgent extends Agent {
+  session = new Session(new AgentSessionProvider(this));
+
+  // ── Messages ────────────────────────────────────────────────────
+
+  async appendMessage(
+    message: SessionMessage,
+    parentId?: string
+  ): Promise<void> {
+    await this.session.appendMessage(message, parentId);
+  }
+
+  getMessage(id: string): SessionMessage | null {
+    return this.session.getMessage(id);
+  }
+
+  updateMessage(message: SessionMessage): void {
+    this.session.updateMessage(message);
+  }
+
+  deleteMessages(ids: string[]): void {
+    this.session.deleteMessages(ids);
+  }
+
+  clearMessages(): void {
+    this.session.clearMessages();
+  }
+
+  // ── History (tree) ──────────────────────────────────────────────
+
+  getHistory(leafId?: string): SessionMessage[] {
+    return this.session.getHistory(leafId);
+  }
+
+  getLatestLeaf(): SessionMessage | null {
+    return this.session.getLatestLeaf();
+  }
+
+  getBranches(messageId: string): SessionMessage[] {
+    return this.session.getBranches(messageId);
+  }
+
+  getPathLength(): number {
+    return this.session.getPathLength();
+  }
+
+  // ── Compaction ──────────────────────────────────────────────────
+
+  addCompaction(
+    summary: string,
+    fromId: string,
+    toId: string
+  ): StoredCompaction {
+    return this.session.addCompaction(summary, fromId, toId);
+  }
+
+  getCompactions(): StoredCompaction[] {
+    return this.session.getCompactions();
+  }
+
+  // ── Search ──────────────────────────────────────────────────────
+
+  search(query: string): Array<{ id: string; role: string; content: string }> {
+    return this.session.search(query);
+  }
+}
+
+/**
+ * Test Agent — context blocks with frozen snapshot
+ */
+export class TestSessionAgentWithContext extends Agent<Cloudflare.Env> {
+  session = new Session(new AgentSessionProvider(this), {
+    context: [
+      {
+        label: "memory",
+        description: "Persistent notes",
+        maxTokens: 500,
+        provider: new AgentContextProvider(this, "memory")
+      },
+      {
+        label: "soul",
+        description: "Identity",
+        provider: { get: async () => "You are helpful." }
+      }
+    ]
+  });
+
+  async freezeSystemPrompt(): Promise<string> {
+    return this.session.freezeSystemPrompt();
+  }
+
+  async refreshSystemPrompt(): Promise<string> {
+    return this.session.refreshSystemPrompt();
+  }
+
+  async setBlock(label: string, content: string): Promise<ContextBlock> {
+    return this.session.replaceContextBlock(label, content);
+  }
+
+  getBlock(label: string): ContextBlock | null {
+    return this.session.getContextBlock(label);
+  }
+
+  getBlocks(): ContextBlock[] {
+    return this.session.getContextBlocks();
+  }
+
+  async getTools(): Promise<Record<string, unknown>> {
+    return this.session.tools();
+  }
+}
+
+type TestResult = { success: boolean; error?: string };
+
+/**
+ * Test Agent — searchable context block with FTS5
+ */
+export class TestSearchAgent extends Agent<Cloudflare.Env> {
+  session = Session.create(this)
+    .withContext("knowledge", {
+      description: "Searchable knowledge base",
+      provider: new AgentSearchProvider(this)
+    })
+    .withCachedPrompt();
+
+  async testIndexAndSearch(): Promise<TestResult> {
+    try {
+      const tools = await this.session.tools();
+      if (!tools.set_context)
+        return { success: false, error: "no set_context" };
+      if (!tools.search_context)
+        return { success: false, error: "no search_context" };
+
+      // Index some content
+      const setTool = tools.set_context as unknown as {
+        execute: (args: Record<string, string>) => Promise<string>;
+      };
+      const searchTool = tools.search_context as unknown as {
+        execute: (args: Record<string, string>) => Promise<string>;
+      };
+
+      await setTool.execute({
+        label: "knowledge",
+        key: "meeting-notes",
+        content: "The deployment is scheduled for Friday with budget concerns"
+      });
+      await setTool.execute({
+        label: "knowledge",
+        key: "design-doc",
+        content: "The API uses REST endpoints with JSON responses"
+      });
+
+      // Single word search
+      const r1 = await searchTool.execute({
+        label: "knowledge",
+        query: "deployment"
+      });
+      if (!r1.includes("meeting-notes"))
+        return { success: false, error: "single word search failed" };
+
+      // Multi-word search (non-adjacent terms)
+      const r2 = await searchTool.execute({
+        label: "knowledge",
+        query: "deployment budget"
+      });
+      if (!r2.includes("meeting-notes"))
+        return {
+          success: false,
+          error: "multi-word non-adjacent search failed"
+        };
+
+      // Search that should not match
+      const r3 = await searchTool.execute({
+        label: "knowledge",
+        query: "nonexistent"
+      });
+      if (!r3.includes("No results"))
+        return { success: false, error: "expected no results" };
+
+      // Cross-key search
+      const r4 = await searchTool.execute({
+        label: "knowledge",
+        query: "REST"
+      });
+      if (!r4.includes("design-doc"))
+        return { success: false, error: "cross-key search failed" };
+
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : String(err)
+      };
+    }
+  }
+
+  async testInitLifecycle(): Promise<TestResult> {
+    try {
+      // The provider should have received label "knowledge" via init()
+      const prompt = await this.session.freezeSystemPrompt();
+      if (!prompt.includes("KNOWLEDGE"))
+        return { success: false, error: "prompt missing KNOWLEDGE" };
+      if (!prompt.includes("search_context"))
+        return { success: false, error: "prompt missing search_context hint" };
+
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : String(err)
+      };
+    }
+  }
+
+  async testUpdateReplacesEntry(): Promise<TestResult> {
+    try {
+      const tools = await this.session.tools();
+      const setTool = tools.set_context as unknown as {
+        execute: (args: Record<string, string>) => Promise<string>;
+      };
+      const searchTool = tools.search_context as unknown as {
+        execute: (args: Record<string, string>) => Promise<string>;
+      };
+
+      // Index then replace
+      await setTool.execute({
+        label: "knowledge",
+        key: "doc",
+        content: "original content about cats"
+      });
+      await setTool.execute({
+        label: "knowledge",
+        key: "doc",
+        content: "replaced content about dogs"
+      });
+
+      // Should find new content
+      const r1 = await searchTool.execute({
+        label: "knowledge",
+        query: "dogs"
+      });
+      if (!r1.includes("replaced"))
+        return { success: false, error: "replacement not found" };
+
+      // Should not find old content
+      const r2 = await searchTool.execute({
+        label: "knowledge",
+        query: "cats"
+      });
+      if (!r2.includes("No results"))
+        return { success: false, error: "old content still searchable" };
+
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : String(err)
+      };
+    }
+  }
+}

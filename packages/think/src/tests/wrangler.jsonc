@@ -1,0 +1,111 @@
+{
+  "compatibility_date": "2026-01-28",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "experimental",
+    "enable_nodejs_tty_module",
+    "enable_nodejs_fs_module",
+    "enable_nodejs_http_modules",
+    "enable_nodejs_perf_hooks_module",
+    "enable_nodejs_v8_module",
+    "enable_nodejs_process_v2"
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "TestAssistantToolsAgent",
+        "name": "TestAssistantToolsAgent"
+      },
+      {
+        "class_name": "TestAssistantAgentAgent",
+        "name": "TestAssistantAgentAgent"
+      },
+      {
+        "class_name": "BareAssistantAgent",
+        "name": "BareAssistantAgent"
+      },
+      {
+        "class_name": "LoopTestAgent",
+        "name": "LoopTestAgent"
+      },
+      {
+        "class_name": "LoopToolTestAgent",
+        "name": "LoopToolTestAgent"
+      },
+      {
+        "class_name": "ThinkTestAgent",
+        "name": "ThinkTestAgent"
+      },
+      {
+        "class_name": "ThinkToolsTestAgent",
+        "name": "ThinkToolsTestAgent"
+      },
+      {
+        "class_name": "ThinkFiberTestAgent",
+        "name": "ThinkFiberTestAgent"
+      },
+      {
+        "class_name": "ThinkClientToolsAgent",
+        "name": "ThinkClientToolsAgent"
+      },
+      {
+        "class_name": "ThinkSessionTestAgent",
+        "name": "ThinkSessionTestAgent"
+      },
+      {
+        "class_name": "ThinkAsyncConfigSessionAgent",
+        "name": "ThinkAsyncConfigSessionAgent"
+      },
+      {
+        "class_name": "ThinkConfigTestAgent",
+        "name": "ThinkConfigTestAgent"
+      },
+      {
+        "class_name": "ThinkConfigInSessionAgent",
+        "name": "ThinkConfigInSessionAgent"
+      },
+      {
+        "class_name": "ThinkProgrammaticTestAgent",
+        "name": "ThinkProgrammaticTestAgent"
+      },
+      {
+        "class_name": "ThinkAsyncHookTestAgent",
+        "name": "ThinkAsyncHookTestAgent"
+      },
+      {
+        "class_name": "ThinkRecoveryTestAgent",
+        "name": "ThinkRecoveryTestAgent"
+      },
+      {
+        "class_name": "ThinkNonRecoveryTestAgent",
+        "name": "ThinkNonRecoveryTestAgent"
+      }
+    ]
+  },
+  "worker_loaders": [{ "binding": "LOADER" }],
+  "main": "worker.ts",
+  "migrations": [
+    {
+      "new_sqlite_classes": [
+        "TestAssistantToolsAgent",
+        "TestAssistantAgentAgent",
+        "BareAssistantAgent",
+        "LoopTestAgent",
+        "LoopToolTestAgent",
+        "ThinkTestAgent",
+        "ThinkToolsTestAgent",
+        "ThinkFiberTestAgent",
+        "ThinkClientToolsAgent",
+        "ThinkSessionTestAgent",
+        "ThinkAsyncConfigSessionAgent",
+        "ThinkConfigTestAgent",
+        "ThinkConfigInSessionAgent",
+        "ThinkProgrammaticTestAgent",
+        "ThinkAsyncHookTestAgent",
+        "ThinkRecoveryTestAgent",
+        "ThinkNonRecoveryTestAgent"
+      ],
+      "tag": "v1"
+    }
+  ]
+}

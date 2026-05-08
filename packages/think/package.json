@@ -1,0 +1,80 @@
+{
+  "name": "@cloudflare/think",
+  "description": "Opinionated chat agent with agentic loop, stream resumption, client tools, and extensions",
+  "keywords": [
+    "cloudflare",
+    "agents",
+    "ai",
+    "assistant",
+    "tools"
+  ],
+  "type": "module",
+  "version": "0.2.4",
+  "license": "MIT",
+  "repository": {
+    "directory": "packages/think",
+    "type": "git",
+    "url": "git+https://github.com/cloudflare/agents.git"
+  },
+  "author": "Cloudflare Inc.",
+  "bugs": {
+    "url": "https://github.com/cloudflare/agents/issues"
+  },
+  "devDependencies": {
+    "@cloudflare/shell": "*",
+    "ai": "^6.0.159",
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "@cloudflare/codemode": ">=0.0.7 <1.0.0",
+    "@cloudflare/shell": ">=0.2.0 <1.0.0",
+    "agents": ">=0.8.7 <1.0.0",
+    "ai": "^6.0.0",
+    "zod": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@cloudflare/codemode": {
+      "optional": true
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/think.d.ts",
+      "import": "./dist/think.js"
+    },
+    "./extensions": {
+      "types": "./dist/extensions/index.d.ts",
+      "import": "./dist/extensions/index.js"
+    },
+    "./tools/workspace": {
+      "types": "./dist/tools/workspace.d.ts",
+      "import": "./dist/tools/workspace.js"
+    },
+    "./tools/execute": {
+      "types": "./dist/tools/execute.d.ts",
+      "import": "./dist/tools/execute.js"
+    },
+    "./tools/extensions": {
+      "types": "./dist/tools/extensions.d.ts",
+      "import": "./dist/tools/extensions.js"
+    },
+    "./tools/browser": {
+      "types": "./dist/tools/browser.d.ts",
+      "import": "./dist/tools/browser.js"
+    },
+    "./tools/sandbox": {
+      "types": "./dist/tools/sandbox.d.ts",
+      "import": "./dist/tools/sandbox.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsx ./scripts/build.ts",
+    "test": "vitest --run -c src/tests/vitest.config.ts",
+    "test:workers": "vitest --run -c src/tests/vitest.config.ts",
+    "test:e2e": "vitest --run -c src/e2e-tests/vitest.config.ts"
+  }
+}

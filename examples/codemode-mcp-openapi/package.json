@@ -1,0 +1,21 @@
+{
+  "name": "@cloudflare/agents-codemode-mcp-openapi-example",
+  "description": "Create search + execute MCP tools from an OpenAPI spec",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types env.d.ts --include-runtime false"
+  },
+  "dependencies": {
+    "@cloudflare/codemode": "*",
+    "agents": "*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260414.1",
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.2",
+    "wrangler": "^4.82.2"
+  }
+}
