@@ -15,7 +15,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "agents": "*",
     "ai": "*",
-    "nanoid": "^5.1.7",
+    "nanoid": "^5.1.16",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "workers-ai-provider": "*",
