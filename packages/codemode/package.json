@@ -20,7 +20,7 @@
     "@tanstack/ai": "^0.10.2",
     "ai": "^6.0.159",
     "vitest": "4.1.4",
-    "zod": "^4.3.6"
+    "zod": "^4.6.6"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.0",
