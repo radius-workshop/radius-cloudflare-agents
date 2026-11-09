@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@cloudflare/codemode": "*",
-    "isomorphic-git": "^1.37.5"
+    "isomorphic-git": "^1.44.12"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.14.6",
